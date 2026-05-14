@@ -1,0 +1,114 @@
+@model Models.Teacher
+@using Utilities
+
+@{
+    ViewBag.Title = "Prof - Détails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    bool canWrite = Models.User.ConnectedUser != null &&
+                    Models.User.ConnectedUser.CanWrite;
+    bool isAdmin = Models.User.ConnectedUser != null &&
+                    Models.User.ConnectedUser.IsAdmin;
+
+    var years = Model.Allocations
+        .Select(a => a.Year)
+        .Distinct()
+        .OrderByDescending(y => y)
+        .ToList();
+}
+
+<div class="panel">
+    <div class="panel-heading">
+        <div class="panel-title">
+            <img src="~/Content/lio.png" class="panel-icon" />
+            <span>Prof - Details</span>
+        </div>
+        <div class="panel-commands">
+            @if (canWrite)
+            {
+                <a href="/Teachers/Edit/@Model.Id" title="Modifier">
+                    <i class="fa fa-edit"></i>
+                </a>
+            }
+            @if (canWrite)
+            {
+                <a href=# id="deleteBtn" title="Effacer">
+                    <i class="fa fa-trash"></i>
+                </a>
+            }
+            <a href="/Teachers/Index" title="Retour">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+    </div>
+
+    <div id="teacherInfo">
+        <details id="teacher_info_details" open>
+            <summary>
+                <i class="fa fa-user"></i>
+                <strong>@Model.LastName @Model.FirstName</strong>
+            </summary>
+            <div class="details-body">
+                <p><i class="fa fa-barcode"></i> @Model.Code</p>
+                <p><i class="fa fa-phone"></i> @Model.Phone</p>
+                <p><i class="fa fa-envelope"></i> @Model.Email</p>
+                <p>
+                    Embauche le
+                    @Model.StartDate.ToString("dd MMMM yyyy",
+                        new System.Globalization.CultureInfo("fr-CA"))
+                </p>
+                <p>@Model.Seniority ans d'anciennete</p>
+                <img src="@Model.Avatar"
+                     class="avatar-large"
+                     onerror="this.src='/App_Assets/Users/no_avatar.png'" />
+            </div>
+        </details>
+    </div>
+
+    <h4 style="padding: 0 15px;">Allocations</h4>
+
+    <div id="allocationsContainer">
+        @Html.Partial("GetTeacherAllocations", Model)
+    </div>
+
+    <div class="panel-footer">
+        <strong>Session courante : @NextSession.ShortCaption</strong>
+    </div>
+</div>
+
+<div id="deleteConfirm" style="display:none; position:fixed; top:25%; left:25%; width:100%; height:100%;
+ justify-content:center; align-items:center;">
+    <div style="background:#fff; border-radius:8px; padding:24px; width:300px;">
+        <h5 style="color:red;"><i class="fa fa-trash"></i> Effacer cet etudiant ?</h5>
+        <p>Cette action est irreversible.</p>
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px;">
+            <button id="cancelDelete" class="btn btn-secondary btn-sm">Annuler</button>
+            @using (Html.BeginForm("Delete", "Students", new { id = Model.Id }, FormMethod.Post))
+            {
+                <button type="submit" class="btn btn-danger btn-sm">D'accord</button>
+            }
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function refreshAllocations() {
+        $.ajax({
+            url: '/Teachers/GetTeacherAllocations/@Model.Id',
+            type: 'GET',
+            success: function (html) {
+                $('#allocationsContainer').html(html);
+                RestoreDetailsState();
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        RestoreDetailsState();
+        setInterval(refreshAllocations, 5000);
+
+        $('#deleteBtn').click(function () { $('#deleteConfirm').show(); });
+        $('#cancelDelete').click(function () { $('#deleteConfirm').hide(); });
+    });
+</script>

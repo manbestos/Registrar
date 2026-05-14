@@ -1,0 +1,96 @@
+@model Models.Course
+@using Utilities
+
+@{
+    ViewBag.Title = "Cours - Détails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    bool canWrite = Models.User.ConnectedUser != null &&
+                    Models.User.ConnectedUser.CanWrite;
+    bool isAdmin = Models.User.ConnectedUser != null &&
+                    Models.User.ConnectedUser.IsAdmin;
+
+    var years = Model.Registrations
+        .Select(r => r.Year)
+        .Distinct()
+        .OrderByDescending(y => y)
+        .ToList();
+}
+
+<div class="panel">
+    <div class="panel-heading">
+        <div class="panel-title">
+            <img src="~/Content/lio.png" class="panel-icon" />
+            <span>Cours - Details</span>
+        </div>
+        <div class="panel-commands">
+            @if (canWrite)
+            {
+                <a href="/Courses/Edit/@Model.Id" title="Modifier">
+                    <i class="fa fa-edit"></i>
+                </a>
+            }
+            @if (isAdmin)
+            {
+                <span id="deleteBtn" title="Supprimer" style="cursor:pointer">
+                    <i class="fa fa-trash"></i>
+                </span>
+            }
+            <a href="/Courses/Index" title="Retour">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+    </div>
+
+    <div style="padding: 15px;">
+        <p><strong>@Model.Code</strong></p>
+        <p>Session @Model.Session</p>
+        <p><strong>@Model.Title</strong></p>
+    </div>
+
+    <h4 style="padding: 0 15px;">Etudiants inscrits</h4>
+
+    <div id="courseRegistrationsContainer">
+        @Html.Partial("GetCourseRegistrations", Model)
+    </div>
+
+    <div class="panel-footer">
+        <strong>Session courante : @NextSession.ShortCaption</strong>
+    </div>
+</div>
+
+<div id="deleteConfirm" style="display:none; position:fixed; top:25%; left:25%; width:100%; height:100%;
+ justify-content:center; align-items:center;">
+    <div style="background:#fff; border-radius:8px; padding:24px; width:300px;">
+        <h5 style="color:red;"><i class="fa fa-trash"></i> Effacer cet etudiant ?</h5>
+        <p>Cette action est irreversible.</p>
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px;">
+            <button id="cancelDelete" class="btn btn-secondary btn-sm">Annuler</button>
+            @using (Html.BeginForm("Delete", "Students", new { id = Model.Id }, FormMethod.Post))
+            {
+                <button type="submit" class="btn btn-danger btn-sm">D'accord</button>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function refreshCourseRegistrations() {
+        $.ajax({
+            url: '/Courses/GetCourseRegistrations/@Model.Id',
+            type: 'GET',
+            success: function (html) {
+                $('#courseRegistrationsContainer').html(html);
+                RestoreDetailsState();
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        RestoreDetailsState();
+        setInterval(refreshCourseRegistrations, 5000);
+
+        $('#deleteBtn').click(function () { $('#deleteConfirm').show(); });
+        $('#cancelDelete').click(function () { $('#deleteConfirm').hide(); });
+    });
+</script>

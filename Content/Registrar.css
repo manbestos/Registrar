@@ -1,0 +1,272 @@
+﻿/* Content/Registrar.css */
+
+/* ==========================================
+   PANEL (carte principale)
+   ========================================== */
+.panel {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin: 15px auto;
+    max-width: 700px;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 15px;
+}
+
+.panel-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+    .panel-title a {
+        color: #aaa;
+        text-decoration: none;
+        font-weight: normal;
+    }
+
+        .panel-title a.active-nav {
+            color: #333;
+            font-weight: bold;
+        }
+
+        .panel-title a:hover {
+            color: #007bff;
+        }
+
+.panel-icon {
+    width: 28px;
+    height: 28px;
+}
+
+.panel-commands {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.3em;
+}
+
+    .panel-commands a,
+    .panel-commands span {
+        color: #007bff;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+        .panel-commands a:hover,
+        .panel-commands span:hover {
+            color: #0056b3;
+        }
+
+.panel-footer {
+    background: #f8f8f8;
+    border-top: 1px solid #ddd;
+    padding: 8px 15px;
+    font-size: 0.9em;
+    color: #555;
+    cursor: pointer;
+}
+
+    .panel-footer:hover {
+        background: #eee;
+    }
+
+/* ==========================================
+   DETAILS / SUMMARY (groupes pliables)
+   ========================================== */
+details {
+    border-top: 1px solid #eee;
+}
+
+    details > summary {
+        background: #e8e8e8;
+        padding: 8px 15px;
+        cursor: pointer;
+        font-weight: bold;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details > summary::before {
+            content: "▼";
+            font-size: 0.8em;
+            transition: transform 0.2s;
+        }
+
+    details:not([open]) > summary::before {
+        content: "▶";
+    }
+
+    details > summary:hover {
+        background: #ddd;
+    }
+
+/* ==========================================
+   LISTE D'ITEMS
+   ========================================== */
+.list-item {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+    .list-item a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 7px 15px 7px 25px;
+        text-decoration: none;
+        color: #333;
+    }
+
+        .list-item a:hover {
+            background: #f5f5ff;
+            color: #007bff;
+        }
+
+.student-code,
+.course-code,
+.teacher-code {
+    color: #007bff;
+    font-family: monospace;
+    min-width: 100px;
+}
+
+/* ==========================================
+   FORMULAIRES
+   ========================================== */
+.form-body {
+    padding: 15px;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+    .form-group label {
+        display: block;
+        font-size: 0.85em;
+        color: #888;
+        margin-bottom: 3px;
+    }
+
+.form-control {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.95em;
+    box-sizing: border-box;
+}
+
+    .form-control:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.15);
+    }
+
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.3em;
+    padding: 0;
+}
+
+/* ==========================================
+   AVATARS
+   ========================================== */
+.avatar-small {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #ddd;
+}
+
+.avatar-large {
+    width: 120px;
+    height: 120px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+    margin-top: 8px;
+}
+
+/* ==========================================
+   MISE EN SURBRILLANCE (recherche)
+   ========================================== */
+mark {
+    background: #ffe066;
+    color: #333;
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+/* ==========================================
+   DETAILS BODY
+   ========================================== */
+.details-body {
+    padding: 10px 15px;
+}
+
+    .details-body p {
+        margin: 5px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #444;
+    }
+
+    .details-body i {
+        color: #888;
+        width: 16px;
+        text-align: center;
+    }
+
+/* ==========================================
+   LIENS ENSEIGNANT
+   ========================================== */
+.teacher-link {
+    color: #17a2b8;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+    .teacher-link:hover {
+        text-decoration: underline;
+    }
+
+/* ==========================================
+   BARRE DE RECHERCHE
+   ========================================== */
+#searchBar {
+    padding: 8px 15px;
+    background: #fafafa;
+    border-bottom: 1px solid #eee;
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+@media (max-width: 768px) {
+    .panel {
+        margin: 8px;
+        border-radius: 0;
+    }
+}

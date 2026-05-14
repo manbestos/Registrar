@@ -1,0 +1,102 @@
+﻿@model Models.Course
+@using Utilities
+
+@{
+    bool creating = Model.Id == 0;
+    ViewBag.Title = creating ? "Cours - Ajout" : "Cours - Modification";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string session = NextSession.ShortCaption;
+    string action = creating ? "Create" : "Edit";
+}
+
+@using (Html.BeginForm(action, "Courses", FormMethod.Post,
+        new { enctype = "multipart/form-data" }))
+{
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.Code)
+
+    <div class="panel">
+        <div class="panel-heading">
+            <div class="panel-title">
+                <img src="~/Content/lio.png" class="panel-icon" />
+                <span>@ViewBag.Title</span>
+            </div>
+            <div class="panel-commands">
+                <button type="submit" title="Sauvegarder" class="btn-icon">
+                    <i class="fa fa-check-circle" style="color:#007bff;"></i>
+                </button>
+                <a href="@(creating ? "/Courses/Index" : "/Courses/Details/" + Model.Id)"
+                   title="Annuler"
+                   class="btn-icon">
+                    <i class="fa fa-times-circle" style="color:#007bff;"></i>
+                </a>
+            </div>
+        </div>
+
+        <details id="course_form_info" open>
+            <summary>Informations - [@Model.Code]</summary>
+            <div class="form-body">
+                <div class="form-group">
+                    <label>Titre</label>
+                    @Html.TextBoxFor(m => m.Title, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.Title)
+                </div>
+                <div class="form-group">
+                    <label>Session (semestre)</label>
+                    @Html.TextBoxFor(m => m.Session, new { @class = "form-control", type = "number", min = "1", max = "8" })
+                    @Html.ValidationMessageFor(m => m.Session)
+                </div>
+            </div>
+        </details>
+
+        <details id="course_form_students" open>
+            <summary>Étudiants inscrits : Session @session</summary>
+            @Helper.SelectionLists(
+                "selectedStudentsId",
+                (SelectList)ViewBag.SelectedStudents,
+                (SelectList)ViewBag.AllStudents
+            )
+        </details>
+
+        <div class="panel-footer">
+            <strong>Session courante : @session</strong>
+        </div>
+    </div>
+}
+
+@helper SelectionLists(string controlId, System.Web.Mvc.SelectList selectedItems, System.Web.Mvc.SelectList items, int size = 10)
+{
+    <div class="select_@controlId selectionsGrid">
+        <select name='@controlId' size='@size.ToString()' multiple class='SelectedItems form-control'>
+            @if (selectedItems != null)
+            {
+                foreach (var si in selectedItems)
+                {
+                    <option value='@si.Value'>@si.Text</option>
+                }
+            }
+        </select>
+        <div class="HorSelectionsCMD">
+            <div class="AddSelection icon fa fa-circle-left" title="Ajouter"></div>
+            <div class="RemoveSelection icon fa fa-circle-right" title="Retirer"></div>
+            <div class="UnselectAll icon fa fa-times" title="Deselectionner"></div>
+        </div>
+        <div class="VerSelectionsCMD">
+            <div class="AddSelection icon fa fa-circle-up" title="Ajouter"></div>
+            <div class="RemoveSelection icon fa fa-circle-down" title="Retirer"></div>
+            <div class="UnselectAll icon fa fa-times" title="Deselectionner"></div>
+        </div>
+        <select size='@size.ToString()' multiple class='UnselectedItems form-control'>
+            @if (items != null)
+            {
+                foreach (var ui in items)
+                {
+                    if (selectedItems == null || selectedItems.Where(s => s.Value == ui.Value).FirstOrDefault() == null)
+                    {
+                        <option value='@ui.Value'>@ui.Text</option>
+                    }
+                }
+            }
+        </select>
+    </div>
+}

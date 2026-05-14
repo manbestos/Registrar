@@ -1,0 +1,90 @@
+@{
+    ViewBag.Title = "Étudiants";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model List<Models.Student>
+<div id="studentsContainer">
+    @Html.Partial("GetStudents", Model)
+</div>
+
+<div id="sessionModal" style="
+display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+background:rgba(0,0,0,0.4); z-index:9999; justify-content:center; align-items:center;">
+    <div style="background:#fff; border-radius:8px; padding:24px; width:300px; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+        <h5 style="margin-bottom:16px;"><i class="fa fa-calendar"></i> Changer la session</h5>
+        <div style="margin-bottom:12px;">
+            <label style="font-size:0.85em; color:#888;">Saison</label>
+            <select id="sessionSeason" class="form-control">
+                <option value="1">Hiver</option>
+                <option value="9">Automne</option>
+            </select>
+        </div>
+        <div style="margin-bottom:20px;">
+            <label style="font-size:0.85em; color:#888;">Annee</label>
+            <input type="number" id="sessionYear" class="foem-control" min="2020" max="2035" />
+        </div>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+            <button id="sessionCancel" class="btn btn-secondary btn-sm">Annuler</button>
+            <button id="sessionSave" class="btn btn-primary btn-sm">Enregistrer</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function refreshStudents() {
+        $.ajax({
+            url: '/Students/GetStudents',
+            type: 'GET',
+            success: function (html) {
+                if (html !== 'blocked') {
+                    var search = $('#searchInput').val();
+                    var year = $('#yearFilter').val();
+                    var searchVisible = $('#searchBar').is(':visible');
+
+                    $('#studentsContainer').html(html);
+                    RestoreDetailsState();
+
+                    if (searchVisible) {
+                        $('#searchBar').show();
+                        $('#searchInput').val(search);
+                        $('#yearFilter').val(year);
+                        if (search !== '' || year !== '')
+                            $('#searchInput').trigger('input');
+                    }
+                }
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        RestoreDetailsState();
+        setInterval(refreshStudents, 5000);
+
+        $(document).on('click', '#sessionFooter', function () {
+            var caption = $('#sessionFooter strong').text().replace('Session courante : ', '').trim();
+            var parts = caption.split(' ');
+            var year = parseInt(parts[1]);
+            var season = parts[0] === 'Hiver' ? '1' : '9';
+            $('#sessionYear').val(year);
+            $('#sessionSeason').val(season);
+            $('#sessionModal').css('display', 'flex');
+        });
+
+        $('#sessionCancel').click(function () {
+            $('#sessionModal').hide();
+        });
+
+        $('#sessionModal').click(function (e) {
+            if (e.target === this) $(this).hide();
+        });
+
+        $('#sessionSave').click(function () {
+            var month = $('#sessionSeason').val();
+            var year = $('#sessionYear').val();
+            $.post('/Home/SetSession', { month: month, year: year }, function (data) {
+                $('#sessionFooter strong').text('Session courante : ' + data.caption);
+                $('#sessionModal').hide();
+            });
+        });
+    });
+</script>

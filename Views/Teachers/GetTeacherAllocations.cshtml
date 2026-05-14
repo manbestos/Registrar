@@ -1,0 +1,32 @@
+@model Models.Teacher
+@using Utilities
+
+@{
+    var years = Model.Allocations
+        .Select(a => a.Year)
+        .Distinct()
+        .OrderByDescending(y => y)
+        .ToList();
+}
+
+@foreach (int year in years)
+{
+    var allocs = Model.Allocations
+        .Where(a => a.Year == year)
+        .OrderBy(a => a.Course.Code)
+        .ToList();
+
+    <details id="teacher_alloc_details_@year" open>
+        <summary>@year</summary>
+        @foreach (var alloc in allocs)
+        {
+            <div class="list-item">
+                <a href="/Courses/Details/@alloc.CourseId">
+                    <span style="color:#555;">[@alloc.Course.Session]</span>
+                    <span class="course-code">@alloc.Course.Code</span>
+                    @alloc.Course.Title
+                </a>
+            </div>
+        }
+    </details>
+}

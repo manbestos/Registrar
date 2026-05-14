@@ -1,0 +1,112 @@
+@model Models.Student
+@using Utilities
+
+@{
+    ViewBag.Title = "Étudiant - Détails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    bool canWrite = Models.User.ConnectedUser != null &&
+                    Models.User.ConnectedUser.CanWrite;
+    bool isAdmin = Models.User.ConnectedUser != null &&
+                    Models.User.ConnectedUser.IsAdmin;
+
+    var years = Model.Registrations
+        .Select(r => r.Year)
+        .Distinct()
+        .OrderByDescending(y => y)
+        .ToList();
+}
+
+<div class="panel">
+    <div class="panel-heading">
+        <div class="panel-title">
+            <img src="~/Content/lio.png" class="panel-icon" />
+            <span>Etudiant - Details</span>
+        </div>
+        <div class="panel-commands">
+            @if (canWrite)
+            {
+                <a href="/Students/Edit/@Model.Id" title="Modifier">
+                    <i class="fa fa fa-edit"></i>
+                </a>
+            }
+            @if (canWrite)
+            {
+                <a href=# title="Effacer" id="deleteBtn">
+                    <i class="fa fa-trash"></i>
+                </a>
+            }
+            <a href="/Students/Index" title="Retour">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+    </div>
+
+    <div id="studentInfo">
+        <details id="student_info_details" open>
+            <summary>
+                <i class="fa fa-graduation-cap"></i>
+                <strong>@Model.LastName @Model.FirstName</strong>
+            </summary>
+            <div class="details-body">
+                <p><i class="fa fa-barcode"></i> @Model.Code</p>
+                <p><i class="fa fa-phone"></i> @Model.Phone</p>
+                <p><i class="fa fa-paper-plane"></i> @Model.Email</p>
+                <p>
+                    <i class="fa fa-birthday-cake"></i>
+                    @Model.BirthDate.ToString("dd MMMM yyyy",
+                    new System.Globalization.CultureInfo("fr-CA"))
+                </p>
+            </div>
+        </details>
+    </div>
+
+    <h4 style="padding: 10px 15px;">Inscriptions</h4>
+    <div id="registrationsContainer">
+        @Html.Partial("GetStudentRegistrations", Model)
+    </div>
+
+    <div class="panel-footer">
+        <strong>Session courante : @NextSession.ShortCaption</strong>
+    </div>
+</div>
+
+<div id="deleteConfirm" style="display:none; position:fixed; top:25%; left:25%; width:100%; height:100%;
+ justify-content:center; align-items:center;">
+    <div style="background:#fff; border-radius:8px; padding:24px; width:300px;">
+        <h5 style="color:red;"><i class="fa fa-trash"></i> Effacer cet etudiant ?</h5>
+        <p>Cette action est irreversible.</p>
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px;">
+            <button id="cancelDelete" class="btn btn-secondary btn-sm">Annuler</button>
+            @using (Html.BeginForm("Delete", "Students", new { id = Model.Id }, FormMethod.Post))
+            {
+                <button type="submit" class="btn btn-danger btn-sm">D'accord</button>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function refreshRegistrations() {
+        $.ajax({
+            url: '/Students/GetStudentRegistrations/@Model.Id',
+            type: 'GET',
+            success: function (html) {
+                $('#registrationsContainer').html(html);
+                RestoreDetailsState();
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        RestoreDetailsState();
+        setInterval(refreshRegistrations, 5000);
+
+        $('#deleteBtn').click(function () {
+            $('#deleteConfirm').show();
+        });
+        $('#cancelDelete').click(function () {
+            $('#deleteConfirm').hide();
+        });
+    });
+</script>

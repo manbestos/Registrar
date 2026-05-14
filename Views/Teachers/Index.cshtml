@@ -1,0 +1,24 @@
+@{
+    ViewBag.Title = "Profs";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model List<Models.Teacher>
+<div id="teachersContainer">
+    @Html.Partial("GetTeachers", Model)
+</div>
+
+<script>
+    function refreshTeachers() {
+        $.ajax({
+            url: '/Teachers/GetTeachers',
+            type: 'GET',
+            success: function (html) {
+                $('#teachersContainer').html(html);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        setInterval(refreshTeachers, 5000);
+    });
+</script>

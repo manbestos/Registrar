@@ -1,0 +1,42 @@
+@model Models.Course
+@using Utilities
+
+@{
+    var years = Model.Registrations
+        .Select(r => r.Year)
+        .Distinct()
+        .OrderByDescending(y => y)
+        .ToList();
+}
+
+@foreach (int year in years)
+{
+    var regs = Model.Registrations
+        .Where(r => r.Year == year)
+        .OrderBy(r => r.Student.LastName)
+        .ToList();
+
+    var teacher = Model.GetTeacherForYear(year);
+
+    <details id="course_reg_details_@year" open>
+        <summary>
+            Cohorte @year
+            @if (teacher != null)
+            {
+                <span> - </span>
+                <a href="/Teachers/Details/@teacher.Id" class="teacher-link">
+                    @teacher.FullName
+                </a>
+            }
+        </summary>
+        @foreach (var reg in regs)
+        {
+            <div class="list-item">
+                <a href="/Students/Details/@reg.StudentId">
+                    <span class="student-code">@reg.Student.Code</span>
+                    @reg.Student.LastName @reg.Student.FirstName
+                </a>
+            </div>
+        }
+    </details>
+}

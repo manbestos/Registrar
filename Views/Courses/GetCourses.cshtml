@@ -1,0 +1,219 @@
+@model IEnumerable<Models.Course>
+@using Utilities
+
+@{
+    bool canWrite = Models.User.ConnectedUser != null &&
+                    Models.User.ConnectedUser.CanWrite;
+
+    var sessions = Model.Select(c => c.Session)
+                        .Distinct()
+                        .OrderBy(s => s)
+                        .ToList();
+}
+
+<div class="panel">
+    <div class="panel-heading">
+        <div class="panel-title">
+            <img src="/Content/lio.png" class="panel-icon" />
+            <a href="/Students/Index">Etudiants</a>
+            <a href="/Courses/Index" class="active-nav">Cours</a>
+            <a href="/Teachers/Index">Profs</a>
+        </div>
+        <div class="panel-commands">
+            @if (canWrite)
+            {
+                <a href="/Courses/Create" title="Ajouter un cours">
+                    <i class="fa fa-plus-circle"></i>
+                </a>
+            }
+            <span id="toggleSearch" title="Rechercher" style="cursor:pointer">
+                <i class="fa fa-search"></i>
+            </span>
+            <!-- Dropdown menu -->
+            <div id="menu" class="dropdown ms-auto">
+                <!-- Menu acces icon -->
+                <div data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="cmdIcon fa fa-bars" title="Menu"></i>
+                </div>
+                <!-- Menu items -->
+                <div class="dropdown-menu noselect" id="DDMenu">
+
+                    <div class="dropdown-item item-layout">
+                        <i class="menuIcon fa fa-address-card"></i>
+                        <a href="/Accounts/EditProfil">Profil...</a>
+                    </div>
+                    <div class="dropdown-item item-layout">
+                        <i class="menuIcon fa fa-sign-out"></i>
+                        <a href="/Accounts/Logout">Dconnexion...</a>
+                    </div>
+
+                    @if (canWrite)
+                    {
+                        <div class="dropdown-divider"></div>
+
+                        <div class="dropdown-item item-layout">
+                            <i class="menuIcon fa fa-users"></i>
+                            <a href="/Accounts/ManageUsers">
+                                Gestion des usagers...
+                            </a>
+                        </div>
+                        <div class="dropdown-item item-layout">
+                            <i class="menuIcon fa fa-calendar-days"></i>
+                            <a href="/Accounts/LoginsJournal">
+                                Historique de connexions...
+                            </a>
+                        </div>
+                        <div class="dropdown-item item-layout">
+                            <i class="menuIcon fa fa-gear"></i>
+                            <a href="/Accounts/EventsJournal">
+                                Journal d'activites...
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="searchBar" style="display:none; padding:5px;">
+        <input type="text" id="searchInput" placeholder="Rechercher..."
+               class="form-control" style="width:200px; display:inline-block;" />
+    </div>
+
+    <div id="coursesList">
+        @foreach (int session in sessions)
+        {
+            var courses = Model.Where(c => c.Session == session)
+                               .OrderBy(c => c.Code)
+                               .ToList();
+            <details id="course_details_session_@session" open>
+                <summary>Session @session</summary>
+                @foreach (var course in courses)
+                {
+                    <div class="list-item course-item"
+                         data-title="@course.Title.ToLower()"
+                         data-code="@course.Code.ToLower()">
+                        <a href="/Courses/Details/@course.Id">
+                            <span class="course-code">@course.Code</span>
+                            <span class="course-title">@course.Title</span>
+                        </a>
+                    </div>
+                }
+            </details>
+        }
+    </div>
+
+    <div class="panel-footer" id="sessionFooter" style="cursor:pointer" title="Changer la session courante">
+        <i class="fa fa-calendar"></i>
+        <strong>Session courante : @Utilities.NextSession.ShortCaption</strong>
+        <i class="fa fa-pencil" style="float:right; color:#aaa;"></i>
+    </div>
+
+    <div id="sessionModal" style="
+    display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.4); z-index:9999; justify-content:center; align-items:center;">
+        <div style="background:#fff; border-radius:8px; padding:24px; width:300px; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+            <h5 style="margin-bottom:16px;"><i class="fa fa-calendar"></i> Changer la session</h5>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:0.85em; color:#888;">Saison</label>
+                <select id="sessionSeason" class="form-control">
+                    <option value="1">Hiver</option>
+                    <option value="9">Automne</option>
+                </select>
+            </div>
+            <div style="margin-bottom:20px;">
+                <label style="font-size:0.85em; color:#888;">Année</label>
+                <input type="number" id="sessionYear" class="form-control" min="2020" max="2035" />
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button id="sessionCancel" class="btn btn-secondary btn-sm">Annuler</button>
+                <button id="sessionSave" class="btn btn-primary btn-sm">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    $('#sessionFooter').click(function () {
+        var caption = '@Utilities.NextSession.ShortCaption';
+        var year = parseInt(caption.split(' ')[1]);
+        var season = caption.startsWith('Hiver') ? '1' : '9';
+        $('#sessionYear').val(year);
+        $('#sessionSeason').val(season);
+        $('#sessionModal').css('display', 'flex');
+    });
+
+    $('#sessionCancel').click(function () {
+        $('#sessionModal').hide();
+    });
+    $('#sessionModal').click(function (e) {
+        if (e.target === this) $(this).hide();
+    });
+
+    $('#sessionSave').click(function () {
+        var month = $('#sessionSeason').val();
+        var year = $('#sessionYear').val();
+        $.post('/Home/SetSession', { month: month, year: year }, function (data) {
+            $('#sessionFooter strong').text('Session courante : ' + data.caption);
+            $('#sessionModal').hide();
+        });
+    });
+    </script>
+</div>
+
+<script>
+    $('#toggleSearch').click(function () {
+        $('#searchBar').toggle();
+        if ($('#searchBar').is(':visible'))
+            $('#searchInput').focus();
+        else {
+            $('#searchInput').val('');
+            filterCourses();
+        }
+    });
+
+    $('#searchInput').on('input', function () {
+        filterCourses();
+    });
+
+    function filterCourses() {
+        var search = $('#searchInput').val().toLowerCase();
+
+        $('details[id^="course_details_session_"]').each(function () {
+            var visibleCount = 0;
+
+            $(this).find('.course-item').each(function () {
+                var title = $(this).data('title');
+                var code  = $(this).data('code');
+
+                if (search === '' || title.indexOf(search) > -1
+                                  || code.indexOf(search) > -1) {
+                    $(this).show();
+
+                    if (search !== '') {
+                        var titleHtml = $(this).find('.course-title').text();
+                        var codeHtml  = $(this).find('.course-code').text();
+                        var regex = new RegExp(search, 'gi');
+
+                        $(this).find('.course-title').html(
+                            titleHtml.replace(regex, m => '<mark>' + m + '</mark>')
+                        );
+                        $(this).find('.course-code').html(
+                            codeHtml.replace(regex, m => '<mark>' + m + '</mark>')
+                        );
+                    } else {
+                        $(this).find('.course-title')
+                               .text($(this).data('title-orig') ||
+                                     $(this).find('.course-title').text());
+                    }
+
+                    visibleCount++;
+                } else {
+                    $(this).hide();
+                }
+            });
+
+            $(this).toggle(visibleCount > 0);
+        });
+    }
+</script>

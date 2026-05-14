@@ -1,0 +1,29 @@
+@{
+    ViewBag.Title = "Cours";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model List<Models.Course>
+
+<div id="coursesContainer">
+    @Html.Partial("GetCourses", Model)
+</div>
+
+<script>
+    function refreshCourses() {
+        $.ajax({
+            url: '/Courses/GetCourses',
+            type: 'GET',
+            success: function (html) {
+                if (html !== 'blocked') {
+                    $('#coursesContainer').html(html);
+                    RestoreDetailsState();
+                }
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        RestoreDetailsState();
+        setInterval(refreshCourses, 5000);
+    });
+</script>

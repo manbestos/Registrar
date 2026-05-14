@@ -1,0 +1,178 @@
+@model IEnumerable<Models.Student>
+@using Utilities
+
+@{
+    var yearsList = ((List<int>)Session["StudentsYearsList"])
+        .OrderByDescending(i => i).ToList();
+
+    bool canWrite = Models.User.ConnectedUser != null &&
+                    Models.User.ConnectedUser.CanWrite;
+}
+
+<div class="panel">
+    <div class="panel-heading">
+        <div class="panel-title">
+            <img src="/Content/lio.png" class="panel-icon" />
+            <a href="/Students/Index" class="active-nav">Etudiants</a>
+            <a href="/Courses/Index">Cours</a>
+            <a href="/Teachers/Index">Profs</a>
+        </div>
+        <div class="panel-commands">
+            @if (canWrite)
+            {
+                <a href="/Students/Create" title="Ajouter un étudiant">
+                    <i class="fa fa-plus-circle"></i>
+                </a>
+            }
+            <span id="toggleSearch" title="Rechercher" style="cursor:pointer">
+                <i class="fa fa-search"></i>
+            </span>
+            <!-- Dropdown menu -->
+            <div id="menu" class="dropdown ms-auto">
+                <!-- Menu acces icon -->
+                <div data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="cmdIcon fa fa-bars" title="Menu"></i>
+                </div>
+                <!-- Menu items -->
+                <div class="dropdown-menu noselect" id="DDMenu">
+
+                    <div class="dropdown-item item-layout">
+                        <i class="menuIcon fa fa-address-card"></i>
+                        <a href="/Accounts/EditProfil">Profil...</a>
+                    </div>
+                    <div class="dropdown-item item-layout">
+                        <i class="menuIcon fa fa-sign-out"></i>
+                        <a href="/Accounts/Logout">Dconnexion...</a>
+                    </div>
+
+                    @if (canWrite)
+                    {
+                        <div class="dropdown-divider"></div>
+
+                        <div class="dropdown-item item-layout">
+                            <i class="menuIcon fa fa-users"></i>
+                            <a href="/Accounts/ManageUsers">
+                                Gestion des usagers...
+                            </a>
+                        </div>
+                        <div class="dropdown-item item-layout">
+                            <i class="menuIcon fa fa-calendar-days"></i>
+                            <a href="/Accounts/LoginsJournal">
+                                Historique de connexions...
+                            </a>
+                        </div>
+                        <div class="dropdown-item item-layout">
+                            <i class="menuIcon fa fa-gear"></i>
+                            <a href="/Accounts/EventsJournal">
+                                Journal d'activites...
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="searchBar" style="display:none; padding: 5px;">
+        <input type="text" id="searchInput" placeholder="Rechercher..."
+               class="form-control" style="display:inline-block; width:200px;" />
+        <select id="yearFilter" class="form-control"
+                style="display:inline-block; width:150px; margin-left:5px;">
+            <option value="">Toutes les annees</option>
+            @foreach (int year in yearsList)
+            {
+                <option value="@year">@year</option>
+            }
+        </select>
+    </div>
+
+    <div id="studentsList">
+        @foreach (int year in yearsList)
+        {
+            var students = Model.Where(s => s.Year == year);
+            if (students.Count() > 0)
+            {
+                <details id="student_details_@year" open>
+                    <summary>Cohorte @year</summary>
+                    @foreach (var item in students.OrderBy(s => s.LastName))
+                    {
+                        <div class="list-item">
+                            <a href="/Students/Details/@item.Id">
+                                <span class="student-code">@item.Code</span>
+                                <span class="student-name">
+                                    @item.LastName @item.FirstName
+                                </span>
+                            </a>
+                        </div>
+                    }
+                </details>
+            }
+        }
+    </div>
+    <div class="panel-footer" id="sessionFooter" style="cursor:pointer" title="Changer la session courante">
+        <i class="fa fa-calendar"></i>
+        <strong>Session courante : @Utilities.NextSession.ShortCaption</strong>
+        <i class="fa fa-pencil" style="float:right; color:#aaa;"></i>
+    </div>
+</div>
+
+<script>
+    $(document).on('click', '#toggleSearch', function () {
+        $('#searchBar').toggle();
+        if ($('#searchBar').is(':visible')) {
+            $('#searchInput').focus();
+        } else {
+            $('#searchInput').val('');
+            $('#yearFilter').val('');
+            filterStudents();
+        }
+    });
+
+    $(document).on('input change', '#searchInput, #yearFilter', function () {
+        filterStudents();
+    });
+
+    function filterStudents() {
+        var search = $('#searchInput').val().toLowerCase().trim();
+        var year = $('#yearFilter').val();
+
+        $('details[id^="student_details_"]').each(function () {
+            var detail = $(this);
+            var detailYear = detail.attr('id').replace('student_details_', '');
+            var showYear = (year === '' || detailYear === year);
+
+            if (!showYear) {
+                detail.hide();
+                return;
+            }
+
+            var visibleCount = 0;
+            detail.find('.list-item').each(function () {
+                var item = $(this);
+                var nameSpan = item.find('.student-name');
+
+                if (!nameSpan.attr('data-original')) {
+                    nameSpan.attr('data-original', nameSpan.text());
+                }
+                var originalText = nameSpan.attr('data-original');
+                var fullText = item.text().toLowerCase();
+
+                if (search === '' || fullText.includes(search)) {
+                    item.show();
+                    visibleCount++;
+                    if (search !== '') {
+                        var regex = new RegExp('(' + search + ')', 'gi');
+                        nameSpan.html(originalText.replace(regex, '<mark>$1</mark>'));
+                    } else {
+                        nameSpan.html(originalText);
+                    }
+                } else {
+                    item.hide();
+                }
+            });
+
+            detail.toggle(visibleCount > 0);
+        });
+    }
+</script>
