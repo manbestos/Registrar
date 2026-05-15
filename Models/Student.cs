@@ -1,4 +1,4 @@
-﻿// Models/Student.cs
+﻿
 using DAL;
 using Newtonsoft.Json;
 using System;

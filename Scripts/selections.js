@@ -7,7 +7,7 @@ function initUI() {
     sortAllSelect();
     deSelectAll($('body'));
 
-    // Quand on sélectionne dans la liste de droite (non sélectionnés)
+
     $('.UnselectedItems').change(function (e) {
         let parent = $(this).parent();
         parent.find('.UnselectedItems option:selected').each(function () {
@@ -19,7 +19,7 @@ function initUI() {
         e.preventDefault();
     });
 
-    // Quand on sélectionne dans la liste de gauche (sélectionnés)
+
     $('.SelectedItems').change(function (e) {
         let parent = $(this).parent();
         parent.find('option:selected').each(function () {
@@ -31,13 +31,11 @@ function initUI() {
         e.preventDefault();
     });
 
-    // IMPORTANT : sélectionne tout avant soumission du formulaire
-    // pour que MVC reçoive tous les IDs sélectionnés
+
     $(document).on('submit', 'form', function () {
         $('.SelectedItems option').prop('selected', true);
     });
 
-    // Bouton Ajouter (← déplace de droite vers gauche)
     $(".AddSelection").on('click', function () {
         let parent = $(this).parent().parent();
         parent.find('.UnselectedItems').first()
@@ -53,7 +51,7 @@ function initUI() {
         parent.find('.UnselectAll').show();
     });
 
-    // Bouton Retirer (→ déplace de gauche vers droite)
+
     $(".RemoveSelection").on('click', function () {
         let parent = $(this).parent().parent();
         parent.find('.SelectedItems').first()
@@ -69,7 +67,7 @@ function initUI() {
         parent.find('.UnselectAll').show();
     });
 
-    // Bouton X (désélectionne tout)
+
     $(".UnselectAll").on('click', function () {
         let parent = $(this).parent().parent();
         deSelectAll(parent);
@@ -84,7 +82,7 @@ function deSelectAll(parent) {
     parent.find('.UnselectedItems option').prop('selected', false);
 }
 
-// Trie les options d'un select alphabétiquement
+
 function sortSelect(select) {
     select.each(function () {
         let sel = $(this);
@@ -108,7 +106,7 @@ function scrollTo(selectObj, optionTop) {
     selectObj.scrollTop(selectObj.scrollTop() + (optionTop - selectTop));
 }
 
-// Conserve l'état ouvert/fermé des balises <details> dans localStorage
+
 function RestoreDetailsState() {
     $("details").off();
     $("details").on('toggle', function () {
@@ -120,7 +118,6 @@ function RestoreDetailsState() {
 
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        // Cible seulement les clés qui contiennent "details"
         if (key.indexOf("details") > -1) {
             let details_dom = $("#" + key)[0];
             if (details_dom != undefined)

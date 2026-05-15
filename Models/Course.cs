@@ -1,4 +1,4 @@
-﻿// Models/Course.cs
+﻿
 using DAL;
 using Newtonsoft.Json;
 using System.Collections.Generic;

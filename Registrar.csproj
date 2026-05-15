@@ -245,6 +245,7 @@
     <Content Include="Views\Accounts\ManageUsers.cshtml" />
     <Content Include="Views\Accounts\GetUsers.cshtml" />
     <Content Include="Views\Medias\About.cshtml" />
+    <None Include="Properties\PublishProfiles\Registrar202430069 - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\Wikimedia-2026 - Web Deploy.pubxml" />
     <Content Include="Views\Students\Index.cshtml" />
     <Content Include="Views\Students\GetStudents.cshtml" />
